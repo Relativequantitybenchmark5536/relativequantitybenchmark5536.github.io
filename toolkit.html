@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pentesting Toolkit — russ0ski</title>
+<meta name="description" content="Pentesting Toolkit de russ0ski: set de herramientas de reconocimiento y explotación para entornos autorizados.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e14; --bg2:#0f141c; --card:#121924; --line:#1e2a3a;
+    --text:#c9d4e0; --muted:#7a8899; --accent:#39ff88; --accent2:#00c2ff; --warn:#ffb454;
+    --mono:'JetBrains Mono',ui-monospace,monospace; --sans:'Inter',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.7;overflow-x:hidden}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px);}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:860px;margin:0 auto;padding:0 20px;position:relative;z-index:1}
+
+  nav{position:sticky;top:0;z-index:10;background:rgba(10,14,20,.85);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;justify-content:space-between;align-items:center;height:58px;max-width:1040px}
+  .logo{font-family:var(--mono);font-weight:800;color:var(--text);font-size:.95rem}
+  .logo span{color:var(--accent)}
+  .back{font-family:var(--mono);font-size:.82rem;color:var(--muted)}
+  .back:hover{color:var(--accent);text-decoration:none}
+
+  header.hero{padding:64px 0 34px;border-bottom:1px solid var(--line);text-align:center}
+  .crumb{font-family:var(--mono);font-size:.8rem;color:var(--muted);margin-bottom:18px}
+  .crumb span{color:var(--accent)}
+  h1{font-family:var(--mono);font-size:clamp(1.9rem,5vw,2.8rem);font-weight:800;color:#fff;letter-spacing:-1px}
+  h1 span{color:var(--accent)}
+  .intro{max-width:620px;margin:20px auto 0;color:var(--muted)}
+  .intro strong{color:#fff}
+  .meta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;justify-content:center}
+  .pill{font-family:var(--mono);font-size:.74rem;padding:4px 11px;border:1px solid var(--line);border-radius:20px;background:var(--bg2);color:var(--text)}
+  .pill.ok{border-color:var(--accent);color:var(--accent)}
+
+  .warnbox{max-width:860px;margin:30px auto 0;background:var(--card);border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:8px;padding:14px 18px;font-size:.92rem;color:var(--text)}
+  .warnbox b{color:var(--warn)}
+
+  section.tools{padding:50px 0}
+  .tool{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:26px 28px;margin-bottom:20px;transition:.25s}
+  .tool:hover{border-color:var(--accent);box-shadow:0 10px 30px rgba(57,255,136,.07)}
+  .tool-head{display:flex;align-items:baseline;gap:14px;margin-bottom:12px;flex-wrap:wrap}
+  .tool-num{font-family:var(--mono);font-weight:800;font-size:1rem;color:var(--accent)}
+  .tool-name{font-family:var(--mono);font-size:1.25rem;font-weight:800;color:#fff}
+  .tool-tag{font-family:var(--mono);font-size:.7rem;padding:3px 9px;border:1px solid var(--line);border-radius:20px;color:var(--accent2)}
+  .tool-right{margin-left:auto;display:flex;gap:12px;align-items:center}
+  .tool-repo{font-family:var(--mono);font-size:.72rem;color:var(--accent2);white-space:nowrap}
+  .tool-repo:hover{color:var(--accent);text-decoration:none}
+  .tool p{color:var(--muted);font-size:.97rem}
+  .tool .steps-soon{margin-top:14px;font-family:var(--mono);font-size:.75rem;color:var(--muted);opacity:.7}
+  .tool .steps-soon::before{content:"// ";color:var(--warn)}
+  .tool .steps{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+  .tool .steps h4{font-family:var(--mono);font-size:.82rem;color:var(--warn);margin-bottom:10px}
+  .tool .steps h4::before{content:"// ";opacity:.8}
+  .tool .steps p{color:var(--muted);font-size:.93rem;margin:10px 0}
+  .tool .steps code{font-family:var(--mono);font-size:.85em;background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:var(--accent)}
+  .cmd{background:#0d1017;border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:12px 0;font-family:var(--mono);font-size:.85rem;line-height:1.7;overflow-x:auto;white-space:pre}
+  .cmd .c{color:var(--muted)}
+  .cmd .g{color:var(--accent)}
+  .note-inline{background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--accent2);border-radius:6px;padding:12px 14px;margin-top:12px;font-size:.9rem;color:var(--text)}
+  .note-inline b{color:var(--accent2)}
+
+  footer{padding:40px 0;text-align:center;font-family:var(--mono);font-size:.78rem;color:var(--muted);border-top:1px solid var(--line)}
+  .foot-nav{margin-bottom:16px}
+  .foot-nav a{color:var(--accent)}
+  @media(max-width:640px){nav .wrap{height:52px}.logo{font-size:.82rem}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a href="index.html" class="logo">russ0ski<span>@</span>security<span>:~$</span></a>
+    <a href="index.html#projects" class="back">← volver</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="crumb">russ0ski / <span>pentesting-toolkit</span></div>
+    <h1>Pentesting <span>Toolkit</span></h1>
+    <p class="intro">Un pequeño set de herramientas que desarrollé para apoyar las fases de <strong>Reconocimiento</strong>, <strong>Explotación</strong> y <strong>Escalada de Privilegios</strong> sobre una máquina víctima. Aquí tienes la descripción de cada una junto a sus pasos de uso.</p>
+    <div class="meta-row">
+      <span class="pill ok">disponible</span>
+      <span class="pill">Hacking</span>
+      <span class="pill">Python</span>
+      <span class="pill">Bash Scripting</span>
+    </div>
+  </div>
+  <div class="warnbox"><b>Aviso:</b> estas herramientas son para uso educativo y solo deben utilizarse sobre sistemas propios o en entornos para los que tengas autorización explícita. No me hago responsable del mal uso que se le de a las mismas.</div>
+</header>
+
+<section class="tools">
+  <div class="wrap">
+
+    <div class="tool">
+      <div class="tool-head"><span class="tool-num">01</span><span class="tool-name">Port Scanner</span><div class="tool-right"><span class="tool-tag">reconocimiento</span><a class="tool-repo" href="https://github.com/russ0ski/Port-Scanner/blob/main/port-scanner.sh" target="_blank" rel="noopener">GitHub ↗</a></div></div>
+      <p>Analiza en profundidad cada puerto disponible en una dirección IP específica, mostrando tanto el número de puertos abiertos como el nombre de los servicios que corren tras ellos y sus versiones, entre otras cosas.</p>
+      <div class="steps">
+        <h4>pasos de uso</h4>
+        <p>Este Script en Bash se vale del programa <strong>Nmap</strong> para realizar el análisis, por lo que es necesario tenerlo instalado en el equipo. Si no se encuentra instalado Nmap, el Script lo hará por ti automáticamente al ejecutarlo.</p>
+        <p>Para poder correr el Script, hay que hacerlo con permisos elevados y apuntando a la dirección IP que desees analizar. A continuación un par de ejemplos de cómo se ejecutaría correctamente:</p>
+        <div class="cmd"><span class="c"># Ejemplo 1</span>
+<span class="g">sudo bash</span> "nombre del Script" "dirección IP"
+
+<span class="c"># Ejemplo 2</span>
+<span class="g">sudo bash</span> Port-Scanner.sh 192.168.0.69</div>
+      </div>
+    </div>
+
+    <div class="tool">
+      <div class="tool-head"><span class="tool-num">02</span><span class="tool-name">Directory Enumerator</span><div class="tool-right"><span class="tool-tag">reconocimiento</span><a class="tool-repo" href="https://github.com/russ0ski/Directory-Enumerator/blob/main/directory-enumerator.py" target="_blank" rel="noopener">GitHub ↗</a></div></div>
+      <p>Realiza una rápida y efectiva enumeración de los posibles Directorios ocultos que pueda contener un sitio Web. Recuerda que siempre que dispongas del Diccionario adecuado, podrás encontrar el Directorio que buscas sin dudas.</p>
+      <div class="steps">
+        <h4>pasos de uso</h4>
+        <p>En la línea 15 se aprecia que estoy utilizando el diccionario <code>common.txt</code>, el cual dejaré adjunto en este repositorio también por si queréis probarlo, pero podéis utilizar el que queráis; sin embargo, tened en cuenta que hay que especificar bien la ruta de vuestro diccionario dentro de la función <code>Open</code>.</p>
+        <div class="note-inline"><b>Aclaraciones:</b> la herramienta se llama Russoski porque es uno de mis apodos, y lo prefiero para estos casos antes que Juan Carlos. "Marta" vendría siendo el nombre de una de mis ex-parejas.</div>
+      </div>
+    </div>
+
+    <div class="tool">
+      <div class="tool-head"><span class="tool-num">03</span><span class="tool-name">MD5 Hash Cracker</span><div class="tool-right"><span class="tool-tag">explotación</span><a class="tool-repo" href="https://github.com/russ0ski/MD5-Hash-Cracker/blob/main/md5-hash-cracker.py" target="_blank" rel="noopener">GitHub ↗</a></div></div>
+      <p>Crackea cualquier tipo de Hash en formato MD5. Recuerda que siempre que dispongas del Diccionario adecuado, podrás encontrar la Contraseña que buscas sin dudas.</p>
+      <div class="steps">
+        <h4>pasos de uso</h4>
+        <p>En la línea 11 se aprecia que estoy utilizando el diccionario <code>500-worst-passwords.txt</code>, el cual dejaré adjunto en este repositorio también por si queréis probarlo, pero podéis utilizar el que queráis; sin embargo, tened en cuenta que hay que especificar bien la ruta de vuestro diccionario dentro de la función <code>Open</code>.</p>
+        <div class="note-inline"><b>Aclaraciones:</b> la herramienta se llama Russoski porque es uno de mis apodos, y lo prefiero para estos casos antes que Juan Carlos. "Estela" vendría siendo el nombre de una de mis ex-parejas.</div>
+      </div>
+    </div>
+
+    <div class="tool">
+      <div class="tool-head"><span class="tool-num">04</span><span class="tool-name">Subdomain Enumerator</span><div class="tool-right"><span class="tool-tag">reconocimiento</span><a class="tool-repo" href="https://github.com/russ0ski/Subdomain-Enumerator/blob/main/subdomain-enumerator.py" target="_blank" rel="noopener">GitHub ↗</a></div></div>
+      <p>Realiza una rápida y efectiva enumeración de los posibles Subdominios ocultos que pueda contener un sitio Web. Recuerda que siempre que dispongas del Diccionario adecuado, podrás encontrar el Subdominio que buscas sin dudas.</p>
+      <div class="steps">
+        <h4>pasos de uso</h4>
+        <p>En la línea 15 se aprecia que estoy utilizando el diccionario <code>subdomains-top1mil-5000.txt</code>, el cual dejaré adjunto en este repositorio también por si queréis probarlo, pero podéis utilizar el que queráis; sin embargo, tened en cuenta que hay que especificar bien la ruta de vuestro diccionario dentro de la función <code>Open</code>.</p>
+        <div class="note-inline"><b>Aclaraciones:</b> la herramienta se llama Russoski porque es uno de mis apodos, y lo prefiero para estos casos antes que Juan Carlos. "Emily" vendría siendo el nombre de una de mis ex-parejas.</div>
+      </div>
+    </div>
+
+    <div class="tool">
+      <div class="tool-head"><span class="tool-num">05</span><span class="tool-name">Strong Credentials</span><div class="tool-right"><span class="tool-tag">persistencia</span><a class="tool-repo" href="https://github.com/russ0ski/Strong-Credentials/blob/main/strong-credentials.py" target="_blank" rel="noopener">GitHub ↗</a></div></div>
+      <p>Genera contraseñas complejas y seguras con esta simple herramienta que combina caracteres alfanuméricos con caracteres especiales y los encadena de manera aleatoria, con una longitud de 20 caracteres lo cual se considera ya una calidad Excelente de seguridad en una contraseña.</p>
+      <div class="steps">
+        <h4>pasos de uso</h4>
+        <p>Algunas páginas Web o programas exigen una longitud de Contraseñas específica para crear una cuenta. Si en caso deseas cambiar la longitud de la Contraseña generada, es tan sencillo como modificar la línea 12, donde se encuentra la variable <code>Longitud</code>, y añadir en lugar de <code>20</code> el valor numérico que desees.</p>
+      </div>
+    </div>
+
+    <div class="tool">
+      <div class="tool-head"><span class="tool-num">06</span><span class="tool-name">Intruder Killer</span><div class="tool-right"><span class="tool-tag">persistencia</span><a class="tool-repo" href="https://github.com/russ0ski/Intruder-Killer/blob/main/intruder-killer.sh" target="_blank" rel="noopener">GitHub ↗</a></div></div>
+      <p>Expulsa de tu red a cualquier equipo que consideres un intruso. Sencillo Script que analiza tu Interfaz de red en busca de equipos conectados y realiza un ataque Denial of Service a la dirección IP que desees, dejándola inutilizable.</p>
+      <div class="steps">
+        <h4>pasos de uso</h4>
+        <p>Este Script en Bash necesita dos herramientas para realizar su función: una es <strong>ARP-Scan</strong> y la otra <strong>Hping3</strong>. La primera ya viene pre-instalada en Kali Linux, sin embargo la segunda no, pero no te preocupes: este Script se encargará de verificarlo y la instalará por ti en caso de ser necesario.</p>
+        <p>Para poder correr el Script, hay que hacerlo con permisos elevados. A continuación un par de ejemplos de cómo se ejecutaría correctamente:</p>
+        <div class="cmd"><span class="c"># Ejemplo 1</span>
+<span class="g">sudo bash</span> "nombre del Script"
+
+<span class="c"># Ejemplo 2</span>
+<span class="g">sudo bash</span> Intruder-Killer.sh</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-nav"><a href="index.html#projects">← volver a proyectos</a></div>
+    © <span id="y"></span> russ0ski · All rights reserved · <span style="color:var(--accent)">exit 0</span>
+  </div>
+</footer>
+<script>document.getElementById('y').textContent=new Date().getFullYear();</script>
+</body>
+</html>

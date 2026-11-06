@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Writeup · Obsession — russ0ski</title>
+<meta name="description" content="Writeup de la máquina vulnerable Obsession (DockerLabs), nivel muy fácil, por russ0ski.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0e14; --bg2:#0f141c; --card:#121924; --line:#1e2a3a;
+    --text:#c9d4e0; --muted:#7a8899; --accent:#39ff88; --accent2:#00c2ff; --warn:#ffb454;
+    --mono:'JetBrains Mono',ui-monospace,monospace; --sans:'Inter',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.75;overflow-x:hidden}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0 1px,transparent 1px 3px);}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:820px;margin:0 auto;padding:0 20px;position:relative;z-index:1}
+
+  nav{position:sticky;top:0;z-index:10;background:rgba(10,14,20,.85);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;justify-content:space-between;align-items:center;height:58px;max-width:1040px}
+  .logo{font-family:var(--mono);font-weight:800;color:var(--text);font-size:.95rem}
+  .logo span{color:var(--accent)}
+  .back{font-family:var(--mono);font-size:.82rem;color:var(--muted)}
+  .back:hover{color:var(--accent);text-decoration:none}
+
+  header.hero{padding:64px 0 34px;border-bottom:1px solid var(--line);text-align:center}
+  .crumb{font-family:var(--mono);font-size:.8rem;color:var(--muted);margin-bottom:18px}
+  .crumb span{color:var(--accent)}
+  h1{font-family:var(--mono);font-size:clamp(1.9rem,5vw,2.8rem);font-weight:800;color:#fff;letter-spacing:-1px}
+  h1 span{color:var(--accent)}
+  .by{font-family:var(--mono);font-size:.9rem;color:var(--muted);margin-top:14px}
+  .by a{color:var(--accent2)}
+  .meta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;justify-content:center}
+  .pill{font-family:var(--mono);font-size:.74rem;padding:4px 11px;border:1px solid var(--line);border-radius:20px;background:var(--bg2);color:var(--text)}
+  .pill.diff{border-color:var(--accent);color:var(--accent)}
+
+  section.phase{padding:46px 0;border-bottom:1px solid var(--line)}
+  h2.phase-title{font-family:var(--mono);font-size:1.4rem;color:var(--accent);margin-bottom:26px;text-align:center;letter-spacing:.5px}
+  h3.metodo{font-family:var(--mono);font-size:1.12rem;color:var(--warn);margin:40px 0 14px;padding-left:12px;border-left:3px solid var(--warn)}
+  p{margin:16px 0}
+  p strong{color:#fff;font-weight:600}
+  a[target]{word-break:break-word}
+
+  figure{margin:22px 0;text-align:center}
+  .shot{display:inline-block;background:#0d1017;border:1px solid var(--line);border-radius:10px;padding:10px;box-shadow:0 10px 30px rgba(0,0,0,.4);max-width:100%}
+  .shot img{display:block;max-width:100%;height:auto;border-radius:6px}
+  figure.full .shot{width:100%}
+  figure.full .shot img{width:100%}
+  .pair{display:flex;gap:16px;justify-content:center;align-items:flex-end;flex-wrap:wrap}
+
+  footer{padding:40px 0;text-align:center;font-family:var(--mono);font-size:.78rem;color:var(--muted)}
+  .legion{font-family:var(--mono);font-size:.82rem;color:var(--muted);text-align:center;padding:30px 0;border-bottom:1px solid var(--line);letter-spacing:1px}
+  .foot-nav{margin-bottom:16px}
+  .foot-nav a{color:var(--accent)}
+
+  @media(max-width:640px){nav .wrap{height:52px}.logo{font-size:.82rem}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a href="../index.html" class="logo">russ0ski<span>@</span>security<span>:~$</span></a>
+    <a href="../index.html#projects" class="back">← volver</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="crumb">russ0ski / writeups / dockerlabs / <span>obsession.html</span></div>
+    <h1>Obsession <span>(Muy Fácil)</span></h1>
+    <div class="by">Autor: <a href="https://www.linkedin.com/in/russo-levano-jimenez/" target="_blank" rel="noopener">russ0ski</a></div>
+    <div class="meta-row">
+      <span class="pill diff">Dificultad: Muy Fácil</span>
+      <span class="pill">DockerLabs</span>
+      <span class="pill">Linux</span>
+      <span class="pill">Hacking</span>
+    </div>
+  </div>
+</header>
+
+<section class="phase">
+  <div class="wrap">
+    <h2 class="phase-title">★ Fase de Enumeración ★</h2>
+
+    <p>Desplegamos la máquina y una vez tengamos la dirección IP, procedemos a realizarle un Ping (enviarle una traza ICMP) para comprobar si tenemos conectividad con ella. Como se puede ver, tenemos conectividad.</p>
+    <figure class="full"><div class="shot"><img src="assets/obsession/1.png" alt=""></div></figure>
+    <figure class="full"><div class="shot"><img src="assets/obsession/2.png" alt=""></div></figure>
+
+    <p>Ahora, realizaremos un reconocimiento con <strong>Nmap</strong>, en donde, al tratarse de una máquina sencilla, nos será suficiente con los siguientes parámetros para poder analizarla en profundidad:</p>
+    <p><strong>-sV:</strong> Nos muestra la versión de los servicios que corren tras la máquina.</p>
+    <p><strong>-sC:</strong> Ejecuta los Scripts básicos de reconocimiento de la herramienta Nmap.</p>
+    <p><strong>-oN:</strong> Guarda el resultado generado en un fichero para su posterior análisis.</p>
+    <figure class="full"><div class="shot"><img src="assets/obsession/3.png" alt=""></div></figure>
+
+    <p>Como se puede observar, están abiertos los puertos 21 (FTP), 22 (SSH) y 80 (HTTP). El servicio FTP tiene el Anonymous Login habilitado, por tanto comenzaremos explorando por allí y luego nos moveremos al resto de puertos.</p>
+    <figure class="full"><div class="shot"><img src="assets/obsession/4.png" alt=""></div></figure>
+
+    <p>Tras listar los archivos disponibles en el servicio, vemos 2 ficheros .txt dentro, procedemos a descargarlos con "<strong>mget</strong>" en nuestra máquina atacante para visualizar su contenido.</p>
+    <figure class="full"><div class="shot"><img src="assets/obsession/5.png" alt=""></div></figure>
+
+    <p>Del primer archivo se puede observar que hay 3 posibles usuarios: Russoski, Gonza y Nágore. Del segundo archivo se puede interpretar que la víctima tiene una configuración poco segura en su equipo.</p>
+    <figure class="full"><div class="shot"><img src="assets/obsession/6.png" alt=""></div></figure>
+
+    <p>Procedemos a explorar el servicio Web del puerto 80 a ver si allí encontramos más pistas. Lo primero que nos encontramos es una página que parece ser un servicio de asesorías de entrenamientos online o algo por el estilo.</p>
+    <figure class="full"><div class="shot"><img src="assets/obsession/7.png" alt=""></div></figure>
+
+    <p>Indagando por la página, vemos que de entre las cosas más interesantes pueden encontrarse este correo electrónico para contactar con la víctima, el cual de momento no utilizaremos.</p>
+    <figure><div class="shot"><img src="assets/obsession/8.png" alt="" style="max-width:300px"></div></figure>
+
+    <p>Y este formulario, el cual probamos a rellenar y enviar pinchando en "CAMBIAR MI VIDA A MEJOR AHORA" a ver donde nos lleva.</p>
+    <figure><div class="shot"><img src="assets/obsession/9.png" alt="" style="max-width:400px"></div></figure>
+
+    <p>Por lo visto es funcional y hemos enviado nuestros datos. Pero no obtenemos mucha información de retorno, aunque se puede observar que el nombre Russoski empieza a repetirse más de una vez a lo largo de la página. Lo tendremos en cuenta.</p>
+    <figure><div class="shot"><img src="assets/obsession/10.png" alt="" style="max-width:460px"></div></figure>
+
+    <p>Y viendo el código fuente de la página con "<strong>ctrl + u</strong>" encontramos que hay un comentario indicando que la víctima utiliza el mismo usuario para todos sus servicios.</p>
+    <figure class="full"><div class="shot"><img src="assets/obsession/11.png" alt=""></div></figure>
+
+    <p>Procederemos a realizar una enumeración de directorios con <strong>Gobuster</strong> para ver si existen rutas ocultas a las que podamos acceder en busca de más información. Vemos que encontramos 2 rutas con nombres interesantes: /backup e /important.</p>
+    <figure class="full"><div class="shot"><img src="assets/obsession/12.png" alt=""></div></figure>
+
+    <p>Tras entrar en ambas, concluimos que la que nos servirá es /backup, ya que en ella daremos con un archivo llamado backup.txt, el cual si entramos en él, encontraremos al fin el nombre de usuario que parece ser de la víctima.</p>
+    <figure><div class="shot"><img src="assets/obsession/14.png" alt="" style="max-width:460px"></div></figure>
+    <figure><div class="shot"><img src="assets/obsession/15.png" alt="" style="max-width:500px"></div></figure>
+  </div>
+</section>
+
+<section class="phase">
+  <div class="wrap">
+    <h2 class="phase-title">★ Fase de Explotación ★</h2>
+
+    <p>Procederemos a realizar un ataque de fuerza bruta con <strong>Hydra</strong>, ya que tenemos un usuario para probar. Lo intentaremos contra el servicio SSH del puerto 22 y utilizaremos como diccionario el infalible rockyou.txt. Tras un rato de espera encontramos al fin la contraseña (iloveme).</p>
+    <figure class="full"><div class="shot"><img src="assets/obsession/16.png" alt=""></div></figure>
+
+    <p>Ya con un nombre de usuario y contraseña disponibles, probaremos a entrar por SSH de manera remota a la máquina víctima. Como vemos, tenemos éxito y estamos dentro, concretamente llegamos a la carpeta /home del usuario "russoski".</p>
+    <figure class="full"><div class="shot"><img src="assets/obsession/17.png" alt=""></div></figure>
+  </div>
+</section>
+
+<section class="phase">
+  <div class="wrap">
+    <h2 class="phase-title">★ Fase de Escalada de Privilegios ★</h2>
+
+    <h3 class="metodo">Método 1</h3>
+    <p>Una vez dentro, si ejecutamos el comando "<strong>sudo -l</strong>" podremos ver que el usuario "russoski" puede ejecutar con permisos elevados y sin necesidad de contraseña la herramienta Vim.</p>
+    <figure><div class="shot"><img src="assets/obsession/18.png" alt="" style="max-width:550px"></div></figure>
+
+    <p>Realizando una rápida búsqueda en <a href="https://gtfobins.github.io/" target="_blank" rel="noopener">GTFOBins</a> encontramos que la herramienta Vim es vulnerable si está configurada para ser ejecutada desde Sudo. El comando para escalar privilegios sería el siguiente:</p>
+    <figure><div class="pair"><div class="shot"><img src="assets/obsession/19.png" alt="" style="max-width:120px"></div><div class="shot"><img src="assets/obsession/20.png" alt="" style="max-width:250px"></div></div></figure>
+
+    <p>Procedemos a ejecutar el comando recomendado por <strong>GTFOBins</strong> y vemos que ya somos root.</p>
+    <figure><div class="shot"><img src="assets/obsession/21.png" alt="" style="max-width:420px"></div></figure>
+
+    <h3 class="metodo">Método 2</h3>
+    <p>Para esta ocasión, probaremos ejecutando el comando "<strong>find / -perm -4000 2&gt;/dev/null</strong>", el cual lo que hace es buscar todos aquellos binarios SUID que se encuentren instalados en el equipo. Vemos los siguientes resultados y observamos que se encuentra instalado el binario Env, el cual suele ser vulnerable si no se configura correctamente.</p>
+    <figure><div class="shot"><img src="assets/obsession/22.png" alt="" style="max-width:460px"></div></figure>
+
+    <p>Realizando una búsqueda en <strong>GTFOBins</strong> otra vez, encontraremos que la herramienta Env es vulnerable y puede ser abusada. El comando para escalar privilegios sería el siguiente:</p>
+    <figure><div class="pair"><div class="shot"><img src="assets/obsession/23.png" alt="" style="max-width:140px"></div><div class="shot"><img src="assets/obsession/24.png" alt="" style="max-width:250px"></div></div></figure>
+
+    <p>Procedemos a ejecutar el comando recomendado pero especificando la ruta absoluta del binario y no la relativa. Funciona.</p>
+    <figure><div class="shot"><img src="assets/obsession/25.png" alt="" style="max-width:460px"></div></figure>
+
+    <h3 class="metodo">Método 3</h3>
+    <p>Por último, si realizamos una intensa búsqueda por los directorios y rutas del equipo, acabaremos dando con un archivo oculto. Éste se encuentra digiriéndose a la ruta donde se aloja el servicio Web del puerto 80 (/var/www/html). Si entramos en el directorio Important y listamos los archivos ocultos con "<strong>ls -a</strong>", encontraremos el archivo .root-passwd.txt.</p>
+    <p>Si visualizamos su contenido encontraremos la contraseña de root, pero está hasheada.</p>
+    <figure class="full"><div class="shot"><img src="assets/obsession/26.png" alt=""></div></figure>
+
+    <p>Ya que no sabemos en qué formato está hasheada la contraseña, lo mejor será digirirnos a <a href="https://crackstation.net/" target="_blank" rel="noopener">CrackStation</a> para averiguarlo e intentar crackearla. Lo conseguimos y vemos que el formato era MD5 y la contraseña original es "fucker".</p>
+    <figure class="full"><div class="shot"><img src="assets/obsession/27.png" alt=""></div></figure>
+
+    <p>Procedemos a utilizar la contraseña que hemos encontrado, ejecutando el comando "<strong>su root</strong>" para cambiar de usuario. Proporcionamos la credencial y vemos que funciona, ya somos root otra vez.</p>
+    <figure><div class="shot"><img src="assets/obsession/28.png" alt="" style="max-width:460px"></div></figure>
+  </div>
+</section>
+
+<section class="phase">
+  <div class="wrap">
+    <h2 class="phase-title">★ Fase de Post-Explotación ★</h2>
+
+    <p>Una vez comprometida la máquina al 100%, sólo nos queda proceder a buscar qué archivos o qué contenido son de nuestro interés. Dirigiéndonos a la carpeta del usuario root encontramos un archivo llamado Video-Nagore-Fernandez.txt, el cual contiene el enlace a un vídeo de YouTube.</p>
+    <p>Si entramos en dicho <a href="https://www.youtube.com/shorts/_v8GzGReTAk" target="_blank" rel="noopener">enlace</a>, veremos que efectivamente, hemos encontrado lo que estábamos buscando.</p>
+    <figure><div class="shot"><img src="assets/obsession/29.png" alt="" style="max-width:460px"></div></figure>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-nav"><a href="../index.html#projects">← volver a proyectos</a> · <a href="https://dockerlabs.es/maquinas/144/descargar" target="_blank" rel="noopener">descargar Obsession ↗</a></div>
+    © <span id="y"></span> russ0ski · All rights reserved · <span style="color:var(--accent)">exit 0</span>
+  </div>
+</footer>
+<script>document.getElementById('y').textContent=new Date().getFullYear();</script>
+</body>
+</html>
